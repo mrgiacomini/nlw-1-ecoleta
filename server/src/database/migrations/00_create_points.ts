@@ -8,7 +8,7 @@ export async function up(knex: Knex) {
     table.string('email').notNullable();
     table.string('phone').notNullable();
     table.decimal('lat').notNullable();
-    table.decimal('long').notNullable();
+    table.decimal('lon').notNullable();
     table.string('city').notNullable();
     table.string('uf', 2).notNullable();
   })
