@@ -18,22 +18,22 @@ interface Item {
 interface Points {
     id: number,
     name: string,
-    image: string,
-    latitude: number,
-    longitude: number
+    image_url: string,
+    lat: number,
+    lon: number
 }
 
 const Points = () => {
     const navigation = useNavigation();
 
-    const [items, setItem] = useState<Item[]>([]);
+    const [items, setItems] = useState<Item[]>([]);
     const [points, setPoints] = useState<Points[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [initialPosition, setInitialPosition] = useState<[number, number]>([0,0]);
 
     useEffect(() => {
-        Api.get('items').then(response => {
-            setItem(response.data);
+        Api.get('/items').then((response) => {
+            setItems(response.data);
         });
     }, []);
 
@@ -56,17 +56,16 @@ const Points = () => {
     }, []);
     
     useEffect(() => {
-        Api.post('points', {
+        Api.get('points', {
             params: {
                 city: 'Londrina',
                 uf: 'PR',
-                items: [1,2,3,4,5,6]
+                items: selectedItems
             }
         }).then(response => {
-            console.log(response.data)
             setPoints(response.data);
         });
-    }, []);
+    }, [selectedItems]);
 
     function handleSelectedItem(id: number) { 
         const alreadySelected = selectedItems.findIndex(item => item === id);
@@ -80,8 +79,8 @@ const Points = () => {
         navigation.goBack();
     };
 
-    const handleNavigateDetail = () => {
-        navigation.navigate('Details');
+    const handleNavigateDetail = (id: number) => {
+        navigation.navigate('Details', {point_id: id});
     };
 
     return (
@@ -104,15 +103,16 @@ const Points = () => {
                             <Marker
                                 key={point.id}
                                 style={styles.mapMarker} 
-                                coordinate={{latitude: point.latitude, longitude: point.longitude}}
-                                onPress={handleNavigateDetail}
+                                coordinate={{latitude: point.lat, longitude: point.lon}}
+                                onPress={() => handleNavigateDetail(point.id)}
                             >
                                 <View style={styles.mapMarkerContainer}>
                                     <Image 
                                         style={styles.mapMarkerImage} 
-                                        source={{uri: point.image}}/>
-                                    <Text style={styles.mapMarkerTitle}>Ponto</Text>
-                                </View>
+                                        source={{uri: point.image_url}}/>
+                                    <Text style={styles.mapMarkerTitle}>{point.name}</Text>
+                                </View>                                
+                                <View style={styles.seta}/>
                             </Marker>
                        ))}
                     </MapView>
@@ -236,6 +236,16 @@ const styles = StyleSheet.create({
       fontFamily: 'Roboto_400Regular',
       textAlign: 'center',
       fontSize: 13,
+    },
+
+    seta: {
+      borderTopWidth: 10,
+      borderTopColor: '#34CB79',
+      borderLeftWidth: 50,
+      borderLeftColor: 'transparent',
+      borderRightWidth: 50,      
+      borderRightColor: 'transparent',
+      borderStyle: 'solid',
     },
 });
 

@@ -16,11 +16,11 @@ class PointsController {
       .where('uf', String(uf))
       .distinct()
       .select('points.*')
-
+   
     const serializedPoints = points.map(point => {
       return {
         ...point,
-        image_url: `http://localhost:5000/uploads/${point.image}`
+        image_url: `${request.protocol}://${request.headers.host}/uploads/points/${point.image}`
       }
     })
 
@@ -38,7 +38,7 @@ class PointsController {
 
     const serializedPoint = {
       ...point,
-      image_url: `http://localhost:5000/uploads/${point.image}`
+      image_url: `${request.protocol}://${request.headers.host}/uploads/points/${point.image}`
     }
 
     const items = await knex('items')

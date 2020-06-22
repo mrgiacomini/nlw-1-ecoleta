@@ -1,16 +1,50 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { Feather as Icon, FontAwesome } from "@expo/vector-icons";
-import { View, Image, StyleSheet, Text, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Image, StyleSheet, Text, TouchableOpacity, SafeAreaView, Linking } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Constants from "expo-constants";
+import Api from '../../services/api';
+
+interface Params {
+  point_id: number
+};
+
+interface Data {
+  point: {
+    name: string,
+    email: string,
+    phone: string,
+    city: string,
+    uf: string,
+    image_url: string,
+  },
+  items: {
+    title: string
+  }[]
+};
 
 const Details = () => {
     const navigation = useNavigation();
+    const route = useRoute();
+    const [data, setData] = useState<Data>({} as Data);
+
+    const routeParams = route.params as Params;
     
     const handleNavigateBack = () => {
         navigation.goBack();
     };
+
+    const handleWhatsapp = () => {
+        Linking.openURL(`whatsapp://send?phone=${data.point.phone}`);
+    };
+
+    useEffect(() => {
+        Api.get('/points/'+routeParams.point_id).then((response) => {
+            setData(response.data);
+        });
+    }, []);
+
 
     return (
         <SafeAreaView style={{flex:1}}>
@@ -19,19 +53,19 @@ const Details = () => {
                 <Icon name="arrow-left" size={20} color="#34cb79" />
             </TouchableOpacity>
 
-            <Image style={styles.pointImage} source={{uri:'http://192.168.1.100:5000/uploads/points/2020-06-07T17-38-10.731Z-Apresentação1.jpg'}}/>
+            <Image style={styles.pointImage} source={{uri: data.point?.image_url}}/>
             
-            <Text style={styles.pointName}>Ponto</Text>
-            <Text style={styles.pointItems}>Itens</Text>
+            <Text style={styles.pointName}>{data.point?.name}</Text>
+            <Text style={styles.pointItems}>{data.items?.map(item => item.title).join(', ')}</Text>
 
             <View style={styles.address}>
                 <Text style={styles.addressTitle}>Endereço</Text>
-                <Text style={styles.addressContent}>Rua</Text>
+                <Text style={styles.addressContent}>{data.point?.city}, {data.point?.uf}</Text>
             </View>
         
         </View>
         <View style={styles.footer}>
-            <RectButton style={styles.button} onPress={()=>{}} >
+            <RectButton style={styles.button} onPress={()=>handleWhatsapp()} >
                 <FontAwesome name="whatsapp" size={20} color='#FFF'/>
                 <Text style={styles.buttonText}>WhatsApp</Text>
             </RectButton>
