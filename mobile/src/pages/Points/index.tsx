@@ -1,10 +1,9 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import { Feather as Icon } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView, Image, Alert } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
-import MapView, {Marker} from 'react-native-maps';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import MapView, {Marker, Point} from 'react-native-maps';
 import { SvgUri } from "react-native-svg";
 import Api from '../../services/api';
 import * as Location from "expo-location";
@@ -23,6 +22,11 @@ interface Points {
     lon: number
 }
 
+interface Params {
+  selectedCity: string,
+  selectedUf: string
+};
+
 const Points = () => {
     const navigation = useNavigation();
 
@@ -30,15 +34,23 @@ const Points = () => {
     const [points, setPoints] = useState<Points[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [initialPosition, setInitialPosition] = useState<[number, number]>([0,0]);
+    const [initialDelta, setInitialDelta] = useState<[number, number]>([0,0]);
+
+    const route = useRoute();
+    const routeParams = route.params as Params;
+
+    var mapRef = useRef<MapView>(null);
 
     useEffect(() => {
-        Api.get('/items').then((response) => {
+        Api.get('items').then((response) => {
             setItems(response.data);
+            setSelectedItems(response.data.map(item => (item.id)));
         });
     }, []);
 
     useEffect(() => {
         async function loadPosition() {
+          if (!points.length) {
             const { status } = await Location.requestPermissionsAsync();
 
             if (status !== 'granted') {
@@ -50,16 +62,27 @@ const Points = () => {
 
             const {latitude, longitude} = location.coords;
             setInitialPosition([latitude, longitude]);
+            setInitialDelta([0.02,0.02]);
+          } else {
+            var lat: number = 0, lon: number = 0;
+            for(var point of points){
+              lat += point.lat;
+              lon += point.lon;              
+            };
+            const latitude = +lat/+points.length; 
+            const longitude = +lon/+points.length;
+            setInitialPosition([latitude, longitude]);
+          }
         };
 
         loadPosition();
-    }, []);
+    }, [points]);
     
     useEffect(() => {
         Api.get('points', {
             params: {
-                city: 'Londrina',
-                uf: 'PR',
+                city: routeParams.selectedCity,
+                uf: routeParams.selectedUf,
                 items: selectedItems
             }
         }).then(response => {
@@ -95,9 +118,13 @@ const Points = () => {
             <View style={styles.mapContainer}>
                 { initialPosition[0] !== 0 &&
                   ( <MapView 
-                        loadingEnabled={initialPosition[0]==0}
+                        loadingEnabled={initialPosition[0]===0}
                         style={styles.map} 
-                        initialRegion={{latitude: initialPosition[0], longitude: initialPosition[1], latitudeDelta: 0.02, longitudeDelta: 0.02}}
+                        initialRegion={{latitude: initialPosition[0], longitude: initialPosition[1], latitudeDelta: initialDelta[0], longitudeDelta: initialDelta[1]}}
+                        ref = {(map)=> mapRef = map}
+                        onMapReady={() => {
+                          mapRef.fitToCoordinates(points.map(p=>({latitude: p.lat, longitude: p.lon})), {edgePadding: { top: 100, right: 100, bottom: 100, left: 100 },animated: false})
+                        }}
                     >
                        { points.map(point => (
                             <Marker
@@ -107,9 +134,10 @@ const Points = () => {
                                 onPress={() => handleNavigateDetail(point.id)}
                             >
                                 <View style={styles.mapMarkerContainer}>
-                                    <Image 
+                                    { point.image_url && <Image 
                                         style={styles.mapMarkerImage} 
-                                        source={{uri: point.image_url}}/>
+                                        source={{uri: point.image_url}}/> 
+                                    }
                                     <Text style={styles.mapMarkerTitle}>{point.name}</Text>
                                 </View>                                
                                 <View style={styles.seta}/>
@@ -178,6 +206,8 @@ const styles = StyleSheet.create({
     mapMarker: {
       width: 90,
       height: 80, 
+      flexDirection: 'column',
+      alignItems: 'center'
     },
   
     mapMarkerContainer: {
@@ -185,7 +215,8 @@ const styles = StyleSheet.create({
       height: 70,
       backgroundColor: '#34CB79',
       flexDirection: 'column',
-      borderRadius: 8,
+      borderTopLeftRadius: 8,
+      borderTopRightRadius: 8,
       overflow: 'hidden',
       alignItems: 'center'
     },
@@ -195,7 +226,7 @@ const styles = StyleSheet.create({
       height: 45,
       resizeMode: 'cover',
     },
-  
+
     mapMarkerTitle: {
       flex: 1,
       fontFamily: 'Roboto_400Regular',
@@ -239,11 +270,12 @@ const styles = StyleSheet.create({
     },
 
     seta: {
+      marginTop: -1,
       borderTopWidth: 10,
       borderTopColor: '#34CB79',
-      borderLeftWidth: 50,
+      borderLeftWidth: 20,
       borderLeftColor: 'transparent',
-      borderRightWidth: 50,      
+      borderRightWidth: 20,      
       borderRightColor: 'transparent',
       borderStyle: 'solid',
     },
