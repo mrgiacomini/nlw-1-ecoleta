@@ -1,7 +1,7 @@
-# Next Level Week by Rocketseat
+# Next Level Week #1 by Rocketseat
 Aplicação web em ReactJS, mobile em ReactNative e servidor em NodeJs.
 
-No mobile adicionei também uma tela de cadastro, sendo possível usuário tabém selecionar Uf e cidade interagindo com o mapa. 
+No mobile adicionei também uma tela de cadastro, sendo possível usuário selecionar Uf e cidade interagindo com o mapa. 
 
 ## Server
   - multer para upload de arquivos e knex para lidar com o banco de dados em SQLite.
