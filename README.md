@@ -1,4 +1,15 @@
 # Next Level Week by Rocketseat
-
 Aplicação web em ReactJS, mobile em ReactNative e servidor em NodeJs.
-Utilizando algumas bibliotecas como por exemplo o multer para upload de arquivos e leatflet para localização no mapa.
+
+No mobile adicionei também uma tela de cadastro, sendo possível usuário tabém selecionar Uf e cidade interagindo com o mapa. 
+
+## Server
+  - multer para upload de arquivos e knex para lidar com o banco de dados em SQLite.
+
+## Web
+ - dropzone para upload de imagem e leaflet para interação com mapa.
+
+## Mobile
+  - formik para o tratamento com o formulário do cadastro.
+  - react-native-maps para trabalhar com o mapa do Google, expo-image-picker para escolher imagem do dispositivo.
+  
