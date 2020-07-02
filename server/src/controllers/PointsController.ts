@@ -50,6 +50,7 @@ class PointsController {
   }
 
   async create(request: Request, response: Response) {
+    
     const {
       name,
       email,
@@ -62,9 +63,9 @@ class PointsController {
     } = request.body;
    
     const trx = await knex.transaction();
-
+    
     const point = {
-      image: request.file.filename,
+      image: request.file ? request.file?.filename : '',
       name,
       email,
       phone,
@@ -73,31 +74,30 @@ class PointsController {
       city,
       uf
     }
-
+    
     const insertedIds = await trx('points').insert(point)
 
     const point_id = insertedIds[0];
-
-    const pointItems = items
-      .split(',')
-      .map((item: string) => item.trim())
-      .map((item_id: number) => {
-        return {
-          item_id,
-          point_id
-        }
-      })
-
+    
+    if (items) {
+      const pointItems = items
+        .split(',')
+        .map((item: string) => item.trim())
+        .map((item_id: number) => {
+          return {
+            item_id,
+            point_id
+          }
+        })
+        await trx('point_items').insert(pointItems);      
+    }
     try {
-      await trx('point_items').insert(pointItems)
-
       await trx.commit();
     } catch (error) {
       await trx.rollback();
-
+      
       return response.status(400).json({ message: 'Falha ao inserir na tabela point_items, verifique os items.' })
     }
-
     return response.json({ id: point_id, ...point, })
   }
 }

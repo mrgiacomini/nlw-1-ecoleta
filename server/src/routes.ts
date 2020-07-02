@@ -19,21 +19,21 @@ routes.get('/points', pointsController.getAll);
 routes.post(
     '/points',
     upload.single('image'),
-    celebrate({
-        body: Joi.object().keys(
-        {
-          name: Joi.string(),
-          email: Joi.string().email(),
-          phone: Joi.number(),
-          lat: Joi.number(),
-          lon: Joi.number(),
-          city: Joi.string(),
-          uf: Joi.string(),
-          items: Joi.string()
-        })
-    }, {
-      abortEarly: false
-    }),
+    // celebrate({
+    //     body: Joi.object().keys(
+    //     {
+    //       name: Joi.string(),
+    //       email: Joi.string().email(),
+    //       phone: Joi.number(),
+    //       lat: Joi.number(),
+    //       lon: Joi.number(),
+    //       city: Joi.string(),
+    //       uf: Joi.string(),
+    //       items: Joi.string()
+    //     })
+    // }, {
+    //   abortEarly: false
+    // }),
     pointsController.create);
 
 export default routes;

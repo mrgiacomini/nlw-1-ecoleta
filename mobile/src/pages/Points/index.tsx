@@ -39,12 +39,12 @@ const Points = () => {
     const route = useRoute();
     const routeParams = route.params as Params;
 
-    var mapRef = useRef<MapView>(null);
+    var mapRef = {} as MapView;
 
     useEffect(() => {
         Api.get('items').then((response) => {
             setItems(response.data);
-            setSelectedItems(response.data.map(item => (item.id)));
+            setSelectedItems(response.data.map((item:any) => (item.id)));
         });
     }, []);
 
@@ -215,8 +215,7 @@ const styles = StyleSheet.create({
       height: 70,
       backgroundColor: '#34CB79',
       flexDirection: 'column',
-      borderTopLeftRadius: 8,
-      borderTopRightRadius: 8,
+      borderRadius: 8,
       overflow: 'hidden',
       alignItems: 'center'
     },

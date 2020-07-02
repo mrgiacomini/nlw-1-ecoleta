@@ -39,6 +39,10 @@ const Home = () => {
         navigation.navigate('Points', { selectedUf, selectedCity });
     }
 
+    const handleNavigateToCreate = () => {
+        navigation.navigate('CreatePoint');
+    }
+
     const placeholderUf = {
       label: 'Selecione o estado',
       value: null,
@@ -61,6 +65,14 @@ const Home = () => {
                 <Text style={styles.title}>Seu marketplace de coleta de resíduos</Text>
                 <Text style={styles.description}>Ajudamos pessoas a encontrarem pontos de coletas de forma eficiente</Text>
             </View>
+            
+            <RectButton style={[styles.button, {marginBottom: 24} ]} onPress={handleNavigateToCreate}>
+                <View style={styles.buttonIcon}>
+                    <Icon name='arrow-right' color='#FFF' size={24}/>    
+                </View>
+                <Text style={styles.buttonText}>Cadastrar</Text>
+            </RectButton>
+
             <View style={styles.select}>
               <RNPickerSelect
                 style={stylesSelect}
@@ -84,7 +96,7 @@ const Home = () => {
                     <View style={styles.buttonIcon}>
                         <Icon name='arrow-right' color='#FFF' size={24}/>    
                     </View>
-                    <Text style={styles.buttonText}>Entrar</Text>
+                    <Text style={styles.buttonText}>Buscar</Text>
                 </RectButton>
             </View>
         </ImageBackground>
